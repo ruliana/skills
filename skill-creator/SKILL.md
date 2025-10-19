@@ -52,7 +52,7 @@ Executable code (Python/Bash/etc.) for tasks that require deterministic reliabil
 - **When to include**: When the same code is being rewritten repeatedly or deterministic reliability is needed
 - **Example**: `scripts/rotate_pdf.py` for PDF rotation tasks
 - **Benefits**: Token efficient, deterministic, may be executed without loading into context
-- **Note**: Scripts may still need to be read by Claude for patching or environment-specific adjustments
+- **Note**: Always use `uv` to manage dependencies in the `scripts/` folder, and `uv run` to run them. Treat the folder `scripts/` as a uv project.
 
 ##### References (`references/`)
 
@@ -172,9 +172,51 @@ To complete SKILL.md, answer the following questions:
 2. When should the skill be used?
 3. In practice, how should Claude use the skill? All reusable skill contents developed above should be referenced so that Claude knows how to use them.
 
-### Step 5: Packaging a Skill
+### Step 5: Deploying a Skill
 
-Once the skill is ready, it should be packaged into a distributable zip file that gets shared with the user. The packaging process automatically validates the skill first to ensure it meets all requirements:
+Once the skill is ready, ask the user how they want to deploy it. There are three options:
+
+1. **Install to personal folder** - Available to all projects on the machine
+2. **Install to project folder** - Available only to the current project
+3. **Package as zip file** - Distributable file for sharing
+
+**Always validate the skill first**, regardless of which deployment option the user chooses:
+
+```bash
+scripts/validate_skill.py <path/to/skill-folder>
+```
+
+The validation script checks:
+- YAML frontmatter format and required fields
+- Skill naming conventions and directory structure
+- Description completeness and quality
+- File organization and resource references
+
+If validation fails, fix the errors before proceeding with deployment.
+
+#### Option 1: Install to Personal Folder
+
+Install the skill to `~/.claude/skills/` to make it available across all projects:
+
+```bash
+scripts/install_skill.py <path/to/skill-folder> --personal
+```
+
+The script creates a symlink, so changes to the skill folder will automatically be reflected.
+
+#### Option 2: Install to Project Folder
+
+Install the skill to `./.claude/skills/` to make it available only to the current project:
+
+```bash
+scripts/install_skill.py <path/to/skill-folder> --project
+```
+
+The script creates a symlink, so changes to the skill folder will automatically be reflected.
+
+#### Option 3: Package as Zip File
+
+Package the skill into a distributable zip file for sharing:
 
 ```bash
 scripts/package_skill.py <path/to/skill-folder>
@@ -186,17 +228,7 @@ Optional output directory specification:
 scripts/package_skill.py <path/to/skill-folder> ./dist
 ```
 
-The packaging script will:
-
-1. **Validate** the skill automatically, checking:
-   - YAML frontmatter format and required fields
-   - Skill naming conventions and directory structure
-   - Description completeness and quality
-   - File organization and resource references
-
-2. **Package** the skill if validation passes, creating a zip file named after the skill (e.g., `my-skill.zip`) that includes all files and maintains the proper directory structure for distribution.
-
-If validation fails, the script will report the errors and exit without creating a package. Fix any validation errors and run the packaging command again.
+The script creates a zip file named after the skill (e.g., `my-skill.zip`) that includes all files and maintains the proper directory structure for distribution.
 
 ### Step 6: Iterate
 

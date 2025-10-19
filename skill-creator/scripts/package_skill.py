@@ -2,18 +2,19 @@
 """
 Skill Packager - Creates a distributable zip file of a skill folder
 
+Note: Run validate_skill.py before packaging to ensure the skill is valid.
+
 Usage:
-    python utils/package_skill.py <path/to/skill-folder> [output-directory]
+    python scripts/package_skill.py <path/to/skill-folder> [output-directory]
 
 Example:
-    python utils/package_skill.py skills/public/my-skill
-    python utils/package_skill.py skills/public/my-skill ./dist
+    python scripts/package_skill.py ./my-skill
+    python scripts/package_skill.py ./my-skill ./dist
 """
 
 import sys
 import zipfile
 from pathlib import Path
-from quick_validate import validate_skill
 
 
 def package_skill(skill_path, output_dir=None):
@@ -43,15 +44,6 @@ def package_skill(skill_path, output_dir=None):
     if not skill_md.exists():
         print(f"❌ Error: SKILL.md not found in {skill_path}")
         return None
-
-    # Run validation before packaging
-    print("🔍 Validating skill...")
-    valid, message = validate_skill(skill_path)
-    if not valid:
-        print(f"❌ Validation failed: {message}")
-        print("   Please fix the validation errors before packaging.")
-        return None
-    print(f"✅ {message}\n")
 
     # Determine output location
     skill_name = skill_path.name
@@ -84,10 +76,11 @@ def package_skill(skill_path, output_dir=None):
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python utils/package_skill.py <path/to/skill-folder> [output-directory]")
+        print("Usage: python scripts/package_skill.py <path/to/skill-folder> [output-directory]")
         print("\nExample:")
-        print("  python utils/package_skill.py skills/public/my-skill")
-        print("  python utils/package_skill.py skills/public/my-skill ./dist")
+        print("  python scripts/package_skill.py ./my-skill")
+        print("  python scripts/package_skill.py ./my-skill ./dist")
+        print("\nNote: Run validate_skill.py before packaging to ensure the skill is valid.")
         sys.exit(1)
 
     skill_path = sys.argv[1]
